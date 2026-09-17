@@ -1,0 +1,20 @@
+{
+  "name": "artesano-api",
+  "description": "API REST de platos y categorías de Arte-Sano bodegón",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "seed": "node scripts/seed.js"
+  },
+  "author": "Ricardo Garcia",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.10.1"
+  }
+}
