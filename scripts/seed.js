@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import { connectDB } from '../config/db.js';
-import Category from '../models/Category.js';
+import Category, { categoryNameCollation } from '../models/Category.js';
 import Dish from '../models/Dish.js';
 
 dotenv.config();
@@ -200,7 +200,7 @@ const seed = async () => {
     for (const group of menu) {
       let category = await Category.findOne({
         name: group.name
-      });
+      }).collation(categoryNameCollation);
 
       if (!category) {
         category = await Category.create({

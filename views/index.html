@@ -201,7 +201,7 @@
                 <td>
                   <code>http://localhost:3001/api/categories</code>
                 </td>
-                <td>Crea una categoría. La descripción es opcional.</td>
+                <td>Crea una categoría. Guarda el nombre con inicial mayúscula, por ejemplo: PASTA → Pasta. La descripción es opcional. Un nombre repetido devuelve 409.</td>
               </tr>
               
               <tr>
@@ -211,7 +211,7 @@
                 </td>
                 <td>
                   Actualiza nombre y descripción. Exige ambos campos;
-                  la descripción puede estar vacía.
+                  la descripción puede estar vacía. Si el nombre pertenece a otra categoría, devuelve 409.
                 </td>
               </tr>
               

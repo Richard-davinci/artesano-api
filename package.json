@@ -7,7 +7,9 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "seed": "node scripts/seed.js"
+    "seed": "node scripts/seed.js",
+    "categories:audit": "node scripts/category-index.js",
+    "categories:index": "node scripts/category-index.js --apply"
   },
   "author": "Ricardo Garcia",
   "license": "ISC",

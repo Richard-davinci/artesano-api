@@ -1,8 +1,24 @@
 import mongoose from 'mongoose';
-import Category from '../models/Category.js';
+import Category, { categoryNameCollation } from '../models/Category.js';
 import Dish from '../models/Dish.js';
 
+// Quita espacios externos y deja solo la inicial en mayúscula.
+function formatCategoryName(name) {
+  const trimmedName = name.trim().toLocaleLowerCase('es');
+  const [first, ...rest] = trimmedName;
+  return first.toLocaleUpperCase('es') + rest.join('');
+}
+
+// Devuelve 409 cuando el nombre ya pertenece a otra categoría.
+const duplicateName = (res) => res.status(409).json({
+  message: 'Ya existe una categoría con ese nombre'
+});
+
+// Identifica un nombre duplicado rechazado por el índice de MongoDB.
+const isDuplicateName = (error) => error.code === 11000 && error.keyPattern?.name === 1;
+
 class CategoryController {
+  // Lista todas las categorías.
   async getAll(req, res) {
     try {
       const categories = await Category.find();
@@ -20,6 +36,7 @@ class CategoryController {
     }
   }
 
+  // Valida el ID y busca la categoría correspondiente.
   async getById(req, res) {
     try {
       const id = req.params.id;
@@ -51,6 +68,7 @@ class CategoryController {
     }
   }
 
+  // Valida los datos y crea una categoría si el nombre está disponible.
   async create(req, res) {
     try {
       if (
@@ -80,8 +98,13 @@ class CategoryController {
         });
       }
 
+      const formattedName = formatCategoryName(name);
+      if (await Category.exists({ name: formattedName }).collation(categoryNameCollation)) {
+        return duplicateName(res);
+      }
+
       const category = await Category.create({
-        name,
+        name: formattedName,
         description
       });
 
@@ -90,6 +113,7 @@ class CategoryController {
         data: category
       });
     } catch (error) {
+      if (isDuplicateName(error)) return duplicateName(res);
       if (error.name === 'ValidationError') {
         return res.status(400).json({
           message: error.message
@@ -104,6 +128,7 @@ class CategoryController {
     }
   }
 
+  // Actualiza la categoría sin permitir que tome el nombre de otra.
   async update(req, res) {
     try {
       const id = req.params.id;
@@ -140,9 +165,20 @@ class CategoryController {
         });
       }
 
+      const formattedName = formatCategoryName(name);
+      if (await Category.exists({
+        _id: { $ne: id },
+        name: formattedName
+      }).collation(categoryNameCollation)) {
+        if (!(await Category.exists({ _id: id }))) {
+          return res.status(404).json({ message: 'Categoría no encontrada' });
+        }
+        return duplicateName(res);
+      }
+
       const category = await Category.findByIdAndUpdate(
         id,
-        { name, description },
+        { name: formattedName, description },
         { new: true, runValidators: true }
       );
 
@@ -157,6 +193,7 @@ class CategoryController {
         data: category
       });
     } catch (error) {
+      if (isDuplicateName(error)) return duplicateName(res);
       if (error.name === 'ValidationError') {
         return res.status(400).json({
           message: error.message
@@ -171,6 +208,7 @@ class CategoryController {
     }
   }
 
+  // Elimina la categoría solo si no tiene platos asociados.
   async delete(req, res) {
     try {
       const id = req.params.id;
