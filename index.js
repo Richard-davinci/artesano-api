@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { connectDB } from './config/db.js';
@@ -12,9 +13,11 @@ import {
 dotenv.config();
 
 const app = express();
+const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim() || 'http://localhost:5173';
 
 app.set('json spaces', 2);
 
+app.use('/api', cors({ origin: frontendOrigin }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
