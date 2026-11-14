@@ -70,6 +70,23 @@ class AuthController {
     }
   }
 
+  // Devuelve el perfil del usuario autenticado.
+  async getMe(req, res, next) {
+    try {
+      const user = await User.findById(req.user._id).select('name email');
+      if (!user) {
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+
+      return res.status(200).json({
+        message: 'Perfil del usuario',
+        data: { _id: user._id, name: user.name, email: user.email }
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
   // Inicia sesión y emite un token.
   async login(req, res, next) {
     try {
