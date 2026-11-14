@@ -9,7 +9,7 @@ const controller = new CategoryController();
 router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
 router.post('/', authMiddleware, roleMiddleware, controller.create);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
+router.put('/:id', authMiddleware, roleMiddleware, controller.update);
+router.delete('/:id', authMiddleware, roleMiddleware, controller.delete);
 
 export default router;
