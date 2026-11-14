@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
@@ -7,6 +8,9 @@ export default function Login() {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
   const { login, logout, autenticado } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const destino = location.state?.from?.pathname || '/perfil';
 
   // Envía las credenciales y muestra el resultado.
   async function handleSubmit(event) {
@@ -17,6 +21,7 @@ export default function Login() {
     try {
       await login(email, password);
       setPassword('');
+      navigate(destino, { replace: true });
     } catch (error) {
       setError(error.message);
     } finally {
@@ -28,6 +33,7 @@ export default function Login() {
     return (
       <main className="menu">
         <h1>Sesión iniciada</h1>
+        <p><Link to="/perfil">Ir a mi perfil</Link></p>
         <button type="button" onClick={logout}>Cerrar sesión</button>
       </main>
     );
