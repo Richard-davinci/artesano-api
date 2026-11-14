@@ -8,3 +8,16 @@ export async function obtenerPlatos(signal) {
   if (!Array.isArray(data)) throw new Error('La respuesta no contiene una lista de platos');
   return data;
 }
+
+export async function iniciarSesion(email, password) {
+  const respuesta = await fetch(`${apiUrl}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!respuesta.ok) {
+    throw new Error('No se pudo iniciar sesión.');
+  }
+  return respuesta.json();
+}
