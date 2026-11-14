@@ -24,6 +24,11 @@ h1 {
   font: 700 clamp(2.5rem, 8vw, 4rem) Georgia, serif;
 }
 
+.lista-platos {
+  display: grid;
+  gap: 1rem;
+}
+
 .plato {
   padding: 1.5rem;
   border: 1px solid #d9c6b2;
