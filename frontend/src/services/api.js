@@ -1,4 +1,4 @@
-const apiUrl = (import.meta.env.VITE_API_URL?.trim() || 'http://localhost:3001').replace(/\/+$/, '');
+export const apiUrl = (import.meta.env.VITE_API_URL?.trim() || 'http://localhost:3001').replace(/\/+$/, '');
 
 export async function obtenerPlatos(signal) {
   const respuesta = await fetch(`${apiUrl}/api/dishes`, { signal });
@@ -20,4 +20,27 @@ export async function iniciarSesion(email, password) {
     throw new Error('No se pudo iniciar sesión.');
   }
   return respuesta.json();
+}
+
+// Envía el token en las solicitudes privadas.
+async function fetchPrivado(endpoint, token, options = {}) {
+  const respuesta = await fetch(`${apiUrl}${endpoint}`, {
+    ...options,
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  const datos = await respuesta.json().catch(() => null);
+  if (!respuesta.ok) {
+    throw new Error(datos?.message || 'No se pudo completar la solicitud.');
+  }
+  return datos.data;
+}
+
+export function obtenerPerfil(token) {
+  return fetchPrivado('/api/auth/me', token);
+}
+
+export function subirFotoPerfil(token, archivo) {
+  const formData = new FormData();
+  formData.append('profileImage', archivo);
+  return fetchPrivado('/api/auth/profileimage', token, { method: 'POST', body: formData });
 }
