@@ -1,0 +1,49 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #2c1b15;
+  background: #faf2e5;
+}
+
+body {
+  margin: 0;
+}
+
+.menu {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+.marca, .categoria {
+  color: #8d341e;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0 0 1.5rem;
+  font: 700 clamp(2.5rem, 8vw, 4rem) Georgia, serif;
+}
+
+.plato {
+  padding: 1.5rem;
+  border: 1px solid #d9c6b2;
+  border-radius: 0.75rem;
+  background: #fffdf8;
+}
+
+.categoria, .plato h2, .precio {
+  margin: 0;
+}
+
+.plato h2 {
+  margin-top: 0.45rem;
+}
+
+.descripcion {
+  line-height: 1.55;
+}
+
+.precio {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
