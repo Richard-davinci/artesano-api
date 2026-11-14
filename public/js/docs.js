@@ -109,6 +109,8 @@ document.querySelectorAll('table tbody tr').forEach((row) => {
   } else if (path === '/api/auth/login') {
     instructions.textContent = 'Usá los datos de tu cuenta de prueba. Esperado: 200 con token; credenciales incorrectas: 401.';
     body = { email: 'prueba.artesano@example.com', password: 'CambiarEjemplo1!' };
+  } else if (path === '/api/auth/profileimage') {
+    instructions.textContent = 'Enviá multipart/form-data con un archivo en el campo profileImage. Agregá Authorization: Bearer TU_TOKEN. Esperado: 200 con la ruta en data.profileImage.';
   } else if (path === '/api/auth/me') {
     instructions.textContent = 'Agregá Authorization: Bearer TU_TOKEN. Esperado: 200 con el perfil; sin token válido: 401.';
   } else if (method === 'POST' && isCategory) {

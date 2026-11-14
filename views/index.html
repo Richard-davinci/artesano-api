@@ -250,7 +250,12 @@
               <tr>
                 <td><span class="method method-get">GET</span></td>
                 <td><code>/api/auth/me</code></td>
-                <td>Devuelve ID, nombre y email. Requiere <code>Authorization: Bearer TU_TOKEN</code>.</td>
+                <td>Devuelve ID, nombre, email y la ruta de la foto si existe. Requiere <code>Authorization: Bearer TU_TOKEN</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span></td>
+                <td><code>/api/auth/profileimage</code></td>
+                <td>Actualiza tu foto de perfil. Requiere JWT y una imagen JPEG, PNG o WebP de hasta 2 MiB.</td>
               </tr>
             </tbody>
           </table>

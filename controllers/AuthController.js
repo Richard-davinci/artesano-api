@@ -1,6 +1,10 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import { randomUUID } from 'node:crypto';
+import { mkdir, writeFile, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
+import { profileImageDir, profileImageExtension } from '../middlewares/profileImageUpload.js';
 
 class AuthController {
   // Registra un usuario.
@@ -73,14 +77,58 @@ class AuthController {
   // Devuelve el perfil del usuario autenticado.
   async getMe(req, res, next) {
     try {
-      const user = await User.findById(req.user._id).select('name email');
+      const user = await User.findById(req.user._id).select('name email profileImage');
       if (!user) {
         return res.status(404).json({ message: 'Usuario no encontrado' });
       }
 
       return res.status(200).json({
         message: 'Perfil del usuario',
-        data: { _id: user._id, name: user.name, email: user.email }
+        data: { _id: user._id, name: user.name, email: user.email, profileImage: user.profileImage ?? null }
+      });
+    } catch (error) {
+      return next(error);
+    }
+  }
+
+  // Guarda la foto y actualiza el perfil.
+  async uploadProfileImage(req, res, next) {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Enviá una imagen en el campo profileImage' });
+      }
+
+      const extension = profileImageExtension(req.file.buffer);
+      if (!extension) {
+        return res.status(400).json({ message: 'Usá una imagen JPEG, PNG o WebP' });
+      }
+
+      const filename = `${randomUUID()}.${extension}`;
+      const path = join(profileImageDir, filename);
+      const profileImage = `/uploads/profiles/${filename}`;
+      await mkdir(profileImageDir, { recursive: true });
+      await writeFile(path, req.file.buffer, { flag: 'wx' });
+
+      let user;
+      try {
+        user = await User.findByIdAndUpdate(
+          req.user._id, { profileImage }, { new: false }
+        ).select('name email profileImage');
+      } catch (error) {
+        await unlink(path).catch(() => {});
+        throw error;
+      }
+      if (!user) {
+        await unlink(path);
+        return res.status(404).json({ message: 'Usuario no encontrado' });
+      }
+
+      const previous = user.profileImage?.match(/^\/uploads\/profiles\/([0-9a-f-]{36}\.(?:jpg|png|webp))$/i);
+      if (previous) await unlink(join(profileImageDir, previous[1])).catch(() => {});
+
+      return res.status(200).json({
+        message: 'Foto de perfil actualizada',
+        data: { _id: user._id, name: user.name, email: user.email, profileImage }
       });
     } catch (error) {
       return next(error);

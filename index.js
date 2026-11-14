@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { fileURLToPath } from 'node:url';
 import { connectDB } from './config/db.js';
 import routerAPI from './routes/index.js';
+import { profileImageDir } from './middlewares/profileImageUpload.js';
 import {
   notFound,
   errorHandler
@@ -22,6 +23,9 @@ const publicPath = fileURLToPath(
 );
 
 app.use(express.static(publicPath));
+app.use('/uploads/profiles', express.static(profileImageDir, {
+  setHeaders: (res) => res.setHeader('X-Content-Type-Options', 'nosniff')
+}));
 
 const port = process.env.PORT;
 
