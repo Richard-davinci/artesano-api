@@ -1,44 +1,47 @@
+import { useEffect, useState } from 'react';
 import PlatoCard from './components/PlatoCard.jsx';
-
-const platos = [
-  {
-    id: 1,
-    nombre: 'Ravioles de ricota con filetto',
-    descripcion: 'Ravioles rellenos de ricota con salsa de tomate y albahaca.',
-    categoria: 'Pastas',
-    precio: 13500
-  },
-  {
-    id: 2,
-    nombre: 'Pizza de muzzarella',
-    descripcion: 'Salsa de tomate, muzzarella, aceitunas y orégano.',
-    categoria: 'Pizzas',
-    precio: 12000
-  },
-  {
-    id: 3,
-    nombre: 'Empanada de carne',
-    descripcion: 'Empanada al horno con carne, cebolla y morrón.',
-    categoria: 'Empanadas',
-    precio: 2200
-  }
-];
+import { obtenerPlatos } from './services/api.js';
 
 export default function App() {
+  const [platos, setPlatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function cargarPlatos() {
+      try {
+        const resultado = await obtenerPlatos(controller.signal);
+        if (!controller.signal.aborted) setPlatos(resultado);
+      } catch {
+        if (!controller.signal.aborted) setError('No pudimos cargar el menú.');
+      } finally {
+        if (!controller.signal.aborted) setCargando(false);
+      }
+    }
+
+    cargarPlatos();
+    return () => controller.abort();
+  }, []);
+
   return (
     <main className="menu">
       <header>
         <p className="marca">Bodegón Arte-Sano</p>
         <h1>Menú</h1>
       </header>
+      {cargando && <p role="status">Cargando menú...</p>}
+      {error && <p role="alert">{error}</p>}
+      {!cargando && !error && platos.length === 0 && <p>No hay platos en el menú.</p>}
       <div className="lista-platos">
         {platos.map((plato) => (
           <PlatoCard
-            key={plato.id}
-            nombre={plato.nombre}
-            descripcion={plato.descripcion}
-            categoria={plato.categoria}
-            precio={plato.precio}
+            key={plato._id}
+            nombre={plato.name}
+            descripcion={plato.description}
+            categoria={plato.category?.name ?? 'Sin categoría'}
+            precio={plato.price}
           />
         ))}
       </div>
