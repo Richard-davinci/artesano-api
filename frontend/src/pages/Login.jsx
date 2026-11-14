@@ -1,29 +1,36 @@
 import { useState } from 'react';
-import { iniciarSesion } from '../services/api.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState('');
-  const [mensaje, setMensaje] = useState('');
+  const { login, logout, autenticado } = useAuth();
 
   // Envía las credenciales y muestra el resultado.
   async function handleSubmit(event) {
     event.preventDefault();
     setEnviando(true);
     setError('');
-    setMensaje('');
 
     try {
-      const resultado = await iniciarSesion(email, password);
+      await login(email, password);
       setPassword('');
-      setMensaje(resultado.message || 'Sesión iniciada.');
     } catch (error) {
       setError(error.message);
     } finally {
       setEnviando(false);
     }
+  }
+
+  if (autenticado) {
+    return (
+      <main className="menu">
+        <h1>Sesión iniciada</h1>
+        <button type="button" onClick={logout}>Cerrar sesión</button>
+      </main>
+    );
   }
 
   return (
@@ -44,7 +51,6 @@ export default function Login() {
           {enviando ? 'Iniciando sesión...' : 'Iniciar sesión'}
         </button>
         {error && <p role="alert">{error}</p>}
-        {mensaje && <p role="status">{mensaje}</p>}
       </form>
     </main>
   );
