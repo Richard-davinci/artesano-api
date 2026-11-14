@@ -85,8 +85,7 @@ document.querySelectorAll('table tbody tr').forEach((row) => {
   urlElement.replaceWith(urlContainer);
   urlContainer.append(urlElement, copyButton);
 
-  // Los GET solo necesitan el botón de copiar.
-  if (!['POST', 'PUT', 'DELETE'].includes(method)) {
+  if (!['POST', 'PUT', 'DELETE'].includes(method) && path !== '/api/auth/me') {
     return;
   }
 
@@ -104,17 +103,30 @@ document.querySelectorAll('table tbody tr').forEach((row) => {
 
   const isCategory = path.startsWith('/api/categories');
 
-  if (method === 'POST' && isCategory) {
+  if (path === '/api/auth/register') {
+    instructions.textContent = 'Enviá nombre, email y una contraseña de prueba. Esperado: 201; email repetido: 409.';
+    body = { name: 'Usuario de prueba', email: 'prueba.artesano@example.com', password: 'CambiarEjemplo1!' };
+  } else if (path === '/api/auth/login') {
+    instructions.textContent = 'Usá los datos de tu cuenta de prueba. Esperado: 200 con token; credenciales incorrectas: 401.';
+    body = { email: 'prueba.artesano@example.com', password: 'CambiarEjemplo1!' };
+  } else if (path === '/api/auth/me') {
+    instructions.textContent = 'Agregá Authorization: Bearer TU_TOKEN. Esperado: 200 con el perfil; sin token válido: 401.';
+  } else if (method === 'POST' && isCategory) {
     instructions.textContent =
-      'Seleccioná POST y Body → JSON. Esperado: 201. '
+      'Seleccioná POST y Body → JSON. Probá sin token: 401; '
+      + 'con Authorization: Bearer TU_TOKEN de usuario común: 403; '
+      + 'con token de administrador y nombre disponible: 201. '
       + 'Copiá el data._id de la respuesta para consultar, '
-      + 'actualizar y eliminar esta categoría de prueba.';
+      + 'actualizar y eliminar esta categoría de prueba. '
+      + 'Para probar un duplicado, volvé a enviar el mismo JSON con el mismo token de administrador. '
+      + 'Esperado: 409 Conflict, «Ya existe una categoría con ese nombre».';
 
     body = categoryExample;
 
   } else if (method === 'POST') {
     instructions.textContent =
-      'Seleccioná POST y Body → JSON. Esperado: 201. '
+      'Seleccioná POST y Body → JSON. Sin token: 401; con token de usuario común: 403. '
+      + 'Con Authorization: Bearer TU_TOKEN de administrador y datos válidos: 201. '
       + 'Copiá el data._id para probar PUT y DELETE. '
       + 'El campo category debe contener el ID de una categoría existente.';
 
@@ -124,7 +136,9 @@ document.querySelectorAll('table tbody tr').forEach((row) => {
     instructions.textContent =
       'Seleccioná PUT y reemplazá :id por el ID de la categoría '
       + 'de prueba. En Body → JSON enviá nombre y descripción. '
-      + 'Esperado: 200 y los datos actualizados.';
+      + 'Probá sin token: 401; con token de usuario común: 403; '
+      + 'con Authorization: Bearer TU_TOKEN de administrador y datos válidos: 200. '
+      + 'Si el nombre pertenece a otra categoría: 409.';
 
     body = {
       name: 'Categoría de prueba actualizada',
@@ -135,20 +149,23 @@ document.querySelectorAll('table tbody tr').forEach((row) => {
     instructions.textContent =
       'Seleccioná PUT y reemplazá :id por el ID del plato de prueba. '
       + 'Elegí Body → JSON y enviá los cinco campos. '
-      + 'Esperado: 200. Usá una categoría existente.';
+      + 'Usá una categoría existente. Sin token: 401; con token de usuario común: 403. '
+      + 'Con Authorization: Bearer TU_TOKEN de administrador y datos válidos: 200.';
 
     body = updateExample;
 
   } else if (method === 'DELETE' && isCategory) {
     instructions.textContent =
       'Seleccioná DELETE y reemplazá :id por el ID de la categoría '
-      + 'de prueba. Dejá Body vacío. Si no tiene platos, esperado: 200. '
-      + 'Si tiene platos asociados, esperado: 400 y el borrado se bloquea.';
+      + 'de prueba. Dejá Body vacío. Sin token: 401; con token de usuario común: 403. '
+      + 'Con Authorization: Bearer TU_TOKEN de administrador y sin platos asociados: 200. '
+      + 'Si tiene platos asociados, devuelve 400 y no la elimina.';
 
   } else if (method === 'DELETE') {
     instructions.textContent =
       'Seleccioná DELETE y reemplazá :id por el ID del plato '
-      + 'de prueba. Dejá Body vacío. Esperado: 200. '
+      + 'de prueba. Dejá Body vacío. Sin token: 401; con token de usuario común: 403. '
+      + 'Con Authorization: Bearer TU_TOKEN de administrador y un plato existente: 200. '
       + 'Consultar después ese ID con GET debe devolver 404.';
   }
 

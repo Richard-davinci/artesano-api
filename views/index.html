@@ -148,6 +148,7 @@
                 <td>
                   Crea un plato con nombre, descripción,
                   precio y categoría. Disponibilidad opcional.
+                  Requiere JWT de administrador. Sin token válido devuelve 401; con usuario común, 403.
                 </td>
               </tr>
               
@@ -159,6 +160,7 @@
                 <td>
                   Actualiza nombre, descripción, precio,
                   disponibilidad y categoría. Exige los cinco campos.
+                  Requiere JWT de administrador. Sin token válido devuelve 401; con usuario común, 403.
                 </td>
               </tr>
               
@@ -167,7 +169,10 @@
                 <td>
                   <code>http://localhost:3001/api/dishes/:id</code>
                 </td>
-                <td>Elimina un plato por ID. No requiere cuerpo.</td>
+                <td>
+                  Elimina un plato por ID. No requiere cuerpo. Requiere JWT de administrador.
+                  Sin token válido devuelve 401; con usuario común, 403.
+                </td>
               </tr>
             </tbody>
             
@@ -201,7 +206,7 @@
                 <td>
                   <code>http://localhost:3001/api/categories</code>
                 </td>
-                <td>Crea una categoría. Guarda el nombre con inicial mayúscula, por ejemplo: PASTA → Pasta. La descripción es opcional. Un nombre repetido devuelve 409.</td>
+                <td>Requiere JWT de administrador. Sin token válido devuelve 401; con usuario común, 403. Si se crea, devuelve 201; si el nombre ya existe, 409.</td>
               </tr>
               
               <tr>
@@ -210,8 +215,9 @@
                   <code>http://localhost:3001/api/categories/:id</code>
                 </td>
                 <td>
-                  Actualiza nombre y descripción. Exige ambos campos;
-                  la descripción puede estar vacía. Si el nombre pertenece a otra categoría, devuelve 409.
+                  Requiere JWT de administrador. Actualiza nombre y descripción.
+                  Sin token válido devuelve 401; con usuario común, 403.
+                  Si el nombre pertenece a otra categoría, devuelve 409.
                 </td>
               </tr>
               
@@ -220,7 +226,31 @@
                 <td>
                   <code>http://localhost:3001/api/categories/:id</code>
                 </td>
-                <td>Elimina una categoría si no tiene platos asociados.</td>
+                <td>
+                  Requiere JWT de administrador. Sin token válido devuelve 401; con usuario común, 403.
+                  Si la categoría tiene platos asociados, devuelve 400 y no la elimina.
+                </td>
+              </tr>
+            </tbody>
+
+            <tbody>
+              <tr class="resource-row">
+                <th colspan="3" scope="rowgroup">Autenticación</th>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span></td>
+                <td><code>/api/auth/register</code></td>
+                <td>Registra un usuario común. Devuelve 201 sin incluir la contraseña.</td>
+              </tr>
+              <tr>
+                <td><span class="method method-post">POST</span></td>
+                <td><code>/api/auth/login</code></td>
+                <td>Inicia sesión. Devuelve un JWT válido por una hora.</td>
+              </tr>
+              <tr>
+                <td><span class="method method-get">GET</span></td>
+                <td><code>/api/auth/me</code></td>
+                <td>Devuelve ID, nombre y email. Requiere <code>Authorization: Bearer TU_TOKEN</code>.</td>
               </tr>
             </tbody>
           </table>
